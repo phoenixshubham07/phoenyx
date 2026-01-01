@@ -4,8 +4,26 @@ import { Float, Html, Line, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { DNA_TOPICS } from '../constants';
 
-// Add type definition for Three.js elements in JSX to fix "Property does not exist" errors
+// Augment the JSX namespace to include Three.js elements used by @react-three/fiber
+// This handles cases where automatic type inference from R3F fails or is missing.
+// We extend both global JSX and React.JSX to cover different project configurations.
 declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      group: any;
+      mesh: any;
+      octahedronGeometry: any;
+      meshStandardMaterial: any;
+      ambientLight: any;
+      hemisphereLight: any;
+      directionalLight: any;
+      pointLight: any;
+      fog: any;
+    }
+  }
+}
+
+declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
       group: any;
