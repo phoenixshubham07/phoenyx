@@ -81,7 +81,7 @@ const DnaBase = ({ position, color, label, isHovered, onHover }: NodeProps) => {
       <Html distanceFactor={10} center>
         <div className={`transition-all duration-300 ${isHovered ? 'opacity-100 scale-110' : 'opacity-40 scale-90'} pointer-events-none`}>
           <div className="bg-black/80 backdrop-blur-md border border-slate-700 px-3 py-1 rounded text-xs font-mono whitespace-nowrap text-white shadow-[0_0_10px_rgba(255,255,255,0.1)]">
-            <span className="text-phoenyx-500 mr-2">>></span>{label}
+            <span className="text-phoenyx-500 mr-2">&gt;&gt;</span>{label}
           </div>
         </div>
       </Html>
