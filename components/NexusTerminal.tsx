@@ -87,7 +87,7 @@ const NexusTerminal: React.FC = () => {
             ))}
             {isLoading && (
               <div className="text-cyan-500 animate-pulse text-xs">
-                > Analyzing Neural Pathways...
+                &gt; Analyzing Neural Pathways...
               </div>
             )}
             <div ref={messagesEndRef} />
