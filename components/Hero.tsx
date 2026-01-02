@@ -16,7 +16,7 @@ const Hero: React.FC<HeroProps> = ({ mousePos }) => {
     <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-[#020617] to-black">
       
       {/* Background Grid - GridScan Component */}
-      <div className="absolute inset-0 z-0 opacity-50">
+      <div className="absolute inset-0 z-0">
         <GridScan
           sensitivity={0.55}
           lineThickness={1}

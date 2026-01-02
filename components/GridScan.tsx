@@ -502,6 +502,8 @@ export const GridScan: React.FC<GridScanProps> = ({
 
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    camera.position.z = 1; // Pull camera back to avoid near clipping plane
+    
     const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
     scene.add(quad);
 
