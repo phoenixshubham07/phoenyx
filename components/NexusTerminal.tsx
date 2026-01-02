@@ -8,10 +8,16 @@ const NexusTerminal: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      const { scrollHeight, clientHeight } = messagesContainerRef.current;
+      messagesContainerRef.current.scrollTo({
+        top: scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   };
 
   useEffect(() => {
@@ -70,7 +76,10 @@ const NexusTerminal: React.FC = () => {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-grow p-6 overflow-y-auto font-mono text-sm space-y-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+          <div 
+            ref={messagesContainerRef}
+            className="flex-grow p-6 overflow-y-auto font-mono text-sm space-y-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent"
+          >
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[80%] p-3 rounded-lg ${
@@ -90,7 +99,6 @@ const NexusTerminal: React.FC = () => {
                 &gt; Analyzing Neural Pathways...
               </div>
             )}
-            <div ref={messagesEndRef} />
           </div>
 
           {/* Input Area */}

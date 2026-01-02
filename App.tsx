@@ -24,11 +24,8 @@ const App: React.FC = () => {
       <CyberCursor />
 
       <nav className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center mix-blend-difference pointer-events-none">
-        <div className="font-display font-bold text-xl pointer-events-auto cursor-pointer">
-          PHOENYX<span className="text-phoenyx-500">.</span>IO
-        </div>
-        <div className="font-mono text-xs hidden md:block opacity-50">
-          STATUS: ONLINE // v4.1
+        <div className="font-display font-bold text-xl pointer-events-auto cursor-pointer lowercase">
+          algophoenyx<span className="text-phoenyx-500">.</span>ai
         </div>
         <button className="pointer-events-auto px-6 py-2 border border-white/20 hover:bg-white hover:text-black transition-colors font-mono text-xs uppercase">
           Login
