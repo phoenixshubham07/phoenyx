@@ -12,7 +12,16 @@ type TerminalLine = {
   variant?: 'DEFAULT' | 'ERROR' | 'SUCCESS' | 'WARNING';
 };
 
-type LoginStep = 'INIT' | 'USERNAME' | 'PASSWORD' | 'PROCESSING' | 'DONE';
+type LoginStep = 
+  | 'INIT' 
+  | 'ACCOUNT_CHECK' 
+  | 'USERNAME' 
+  | 'PASSWORD' 
+  | 'CREATE_USERNAME' 
+  | 'CREATE_PASSWORD' 
+  | 'PROCESSING' 
+  | 'CREATING' 
+  | 'DONE';
 
 const LoginPage: React.FC<LoginPageProps> = ({ onBack }) => {
   const [lines, setLines] = useState<TerminalLine[]>([]);
@@ -59,13 +68,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack }) => {
       schedule(() => addLine("LOADING NEURAL EMBEDDINGS...", 'SYSTEM'), 1500);
       schedule(() => addLine("CRYPTOGRAPHIC HANDSHAKE: SYNCHRONIZED.", 'SYSTEM', 'SUCCESS'), 2400);
       schedule(() => {
-        addLine("PLEASE IDENTIFY YOURSELF.", 'SYSTEM');
-        setStep('USERNAME');
+        addLine("USER DATABASE LOADED.", 'SYSTEM');
+        addLine("DO YOU HAVE AN EXISTING ACCOUNT? (Y/N)", 'SYSTEM');
+        setStep('ACCOUNT_CHECK');
       }, 3000);
 
       return () => {
-        // We only clear timeouts if component unmounts.
-        // If we want to persist state across re-renders (strict mode), we rely on the ref check.
         timeouts.forEach(clearTimeout);
       };
     }
@@ -73,7 +81,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack }) => {
 
   // Auto-focus input
   useEffect(() => {
-    if (step === 'USERNAME' || step === 'PASSWORD' || step === 'DONE') {
+    if (['ACCOUNT_CHECK', 'USERNAME', 'PASSWORD', 'CREATE_USERNAME', 'CREATE_PASSWORD', 'DONE'].includes(step)) {
       const timer = setTimeout(() => {
         if(inputRef.current) inputRef.current.focus();
       }, 100);
@@ -88,43 +96,102 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack }) => {
     const val = inputValue;
     setInputValue('');
 
-    if (step === 'USERNAME') {
-      addLine(val, 'USER');
-      // Simulate lookup delay
+    // Display user input
+    if (step === 'PASSWORD' || step === 'CREATE_PASSWORD') {
+        addLine("•".repeat(val.length), 'USER');
+    } else {
+        addLine(val, 'USER');
+    }
+
+    // --- State Machine Logic ---
+    
+    if (step === 'ACCOUNT_CHECK') {
+        const isYes = val.toLowerCase().startsWith('y');
+        if (isYes) {
+            setTimeout(() => {
+                 addLine("INITIATING LOGIN SEQUENCE...", 'SYSTEM');
+                 addLine("PLEASE ENTER YOUR EMAIL/USERNAME:", 'SYSTEM');
+                 setStep('USERNAME');
+            }, 400);
+        } else {
+            setTimeout(() => {
+                 addLine("INITIATING NEW USER PROTOCOL...", 'SYSTEM');
+                 addLine("ESTABLISHING NEURAL PATHWAY...", 'SYSTEM');
+                 addLine("ENTER DESIRED EMAIL/USERNAME:", 'SYSTEM');
+                 setStep('CREATE_USERNAME');
+            }, 600);
+        }
+    }
+
+    // --- Login Flow ---
+    else if (step === 'USERNAME') {
       setTimeout(() => {
          addLine(`IDENTITY RECOGNIZED: [${val.toUpperCase()}]`, 'SYSTEM', 'SUCCESS');
-         addLine("ENTER ACCESS KEY:", 'SYSTEM');
+         addLine("ENTER PASSWORD:", 'SYSTEM');
          setStep('PASSWORD');
       }, 600);
-    } else if (step === 'PASSWORD') {
-      addLine("•".repeat(val.length), 'USER');
+    } 
+    else if (step === 'PASSWORD') {
       setStep('PROCESSING');
-      
       addLine("VERIFYING HASH...", 'SYSTEM', 'WARNING');
       
-      // Verification Simulation
+      // Verification Simulation (Always fails for "demo" vibe, or could succeed)
       setTimeout(() => {
         addLine("ERROR: INVALID CREDENTIALS.", 'SYSTEM', 'ERROR');
         addLine("PROTOCOL BETA ACCESS RESTRICTED.", 'SYSTEM', 'ERROR');
-        addLine("RETRY SEQUENCE? (Y/N)", 'SYSTEM', 'WARNING');
+        addLine("RESTART SEQUENCE? (Y/N)", 'SYSTEM', 'WARNING');
         setStep('DONE');
       }, 2000);
-    } else if (step === 'DONE') {
-       addLine(val, 'USER');
-       if (val.toLowerCase() === 'y' || val.toLowerCase() === 'yes') {
-         sequenceStarted.current = false; // Reset lock for restart
-         setStep('INIT');
+    } 
+
+    // --- Sign Up Flow ---
+    else if (step === 'CREATE_USERNAME') {
+        setTimeout(() => {
+            addLine(`AVAILABILITY CONFIRMED: [${val.toUpperCase()}]`, 'SYSTEM', 'SUCCESS');
+            addLine("SET SECURE ACCESS KEY:", 'SYSTEM');
+            setStep('CREATE_PASSWORD');
+        }, 500);
+   }
+   else if (step === 'CREATE_PASSWORD') {
+       setStep('CREATING');
+       addLine("ENCRYPTING DATA...", 'SYSTEM', 'WARNING');
+       setTimeout(() => {
+           addLine("GENERATING NEURAL SIGNATURE...", 'SYSTEM');
+       }, 800);
+       setTimeout(() => {
+            addLine("ACCOUNT CREATION SUCCESSFUL.", 'SYSTEM', 'SUCCESS');
+            addLine("WELCOME TO THE NEXUS, INITIATE.", 'SYSTEM', 'SUCCESS');
+            addLine("RETURN TO MAIN MENU? (Y/N)", 'SYSTEM', 'WARNING');
+            setStep('DONE');
+       }, 2500);
+   }
+
+    // --- Completion ---
+    else if (step === 'DONE') {
+       if (val.toLowerCase().startsWith('y')) {
+           // If we just finished creating an account successfully, Y takes us back to main app
+           const lastSysMsg = lines.filter(l => l.sender === 'SYSTEM').pop()?.text || "";
+           if (lastSysMsg.includes("MAIN MENU")) {
+               onBack();
+           } else {
+               // Otherwise (failed login), restart sequence
+               sequenceStarted.current = false;
+               setStep('INIT');
+           }
        } else {
          onBack();
        }
     }
   };
 
+  const isInputHidden = step === 'INIT' || step === 'PROCESSING' || step === 'CREATING';
+  const isSecure = step === 'PASSWORD' || step === 'CREATE_PASSWORD';
+
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden font-mono flex items-center justify-center">
       
       {/* 3D Background */}
-      <AuthGateVisualizer isSecureMode={step === 'PASSWORD'} activityLevel={step === 'USERNAME' ? 0.8 : 0} />
+      <AuthGateVisualizer isSecureMode={isSecure} activityLevel={isInputHidden ? 0.2 : 0.8} />
       
       {/* Dark Overlay for readability */}
       <div className="absolute inset-0 bg-black/70 z-10 pointer-events-none"></div>
@@ -166,12 +233,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onBack }) => {
                ))}
                
                {/* Input Area */}
-               {(step !== 'PROCESSING' && step !== 'INIT') && (
+               {!isInputHidden && (
                  <form onSubmit={handleSubmit} className="mt-4 flex items-center text-cyan-500 text-lg">
                     <span className="mr-3 font-bold opacity-80">{step === 'DONE' ? 'CMD' : 'INPUT'}&gt;</span>
                     <input 
                       ref={inputRef}
-                      type={step === 'PASSWORD' ? "password" : "text"}
+                      type={isSecure ? "password" : "text"}
                       value={inputValue}
                       onChange={e => setInputValue(e.target.value)}
                       className="bg-transparent border-none outline-none flex-grow text-cyan-300 font-bold caret-transparent p-0 m-0"
