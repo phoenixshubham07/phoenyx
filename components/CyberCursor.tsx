@@ -110,42 +110,50 @@ const CyberCursor: React.FC = () => {
   const lastPosRef = useRef<{ x: number, y: number } | null>(null);
 
   useEffect(() => {
+    let animationFrameId: number;
+
     const handleMouseMove = (e: MouseEvent) => {
-      const currentX = e.clientX;
-      const currentY = e.clientY;
+      // Throttle updates via RAF
+      if (animationFrameId) return;
 
-      if (lastPosRef.current) {
-        const dx = currentX - lastPosRef.current.x;
-        const dy = currentY - lastPosRef.current.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        // Calculate angle of movement (in degrees)
-        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+      animationFrameId = requestAnimationFrame(() => {
+        const currentX = e.clientX;
+        const currentY = e.clientY;
 
-        // Only spawn if moved enough
-        if (distance > 10) {
-            const rift: RiftPoint = {
-                id: idRef.current++,
-                x: currentX,
-                y: currentY,
-                angle: angle,
-                // Length depends on speed (stretched out)
-                length: Math.min(200, 40 + distance * 2),
-                // Thickness varies slightly randomly but stays relatively thin
-                thickness: 20 + Math.random() * 20, 
-                clipPath: generateSlashPath()
-            };
+        if (lastPosRef.current) {
+            const dx = currentX - lastPosRef.current.x;
+            const dy = currentY - lastPosRef.current.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Calculate angle of movement (in degrees)
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
 
-            setRifts(prev => {
-                const newRifts = [...prev, rift];
-                // Limit number of active rifts
-                if (newRifts.length > 10) return newRifts.slice(newRifts.length - 10);
-                return newRifts;
-            });
+            // Only spawn if moved enough
+            if (distance > 10) {
+                const rift: RiftPoint = {
+                    id: idRef.current++,
+                    x: currentX,
+                    y: currentY,
+                    angle: angle,
+                    // Length depends on speed (stretched out)
+                    length: Math.min(200, 40 + distance * 2),
+                    // Thickness varies slightly randomly but stays relatively thin
+                    thickness: 20 + Math.random() * 20, 
+                    clipPath: generateSlashPath()
+                };
+
+                setRifts(prev => {
+                    const newRifts = [...prev, rift];
+                    // Limit number of active rifts
+                    if (newRifts.length > 8) return newRifts.slice(newRifts.length - 8);
+                    return newRifts;
+                });
+            }
         }
-      }
-      
-      lastPosRef.current = { x: currentX, y: currentY };
+        
+        lastPosRef.current = { x: currentX, y: currentY };
+        animationFrameId = 0;
+      });
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -157,6 +165,7 @@ const CyberCursor: React.FC = () => {
     return () => {
         window.removeEventListener('mousemove', handleMouseMove);
         clearInterval(cleanupInterval);
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
   }, []);
 

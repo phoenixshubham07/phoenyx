@@ -4,41 +4,6 @@ import { Float, Html, Line, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { DNA_TOPICS } from '../constants';
 
-// Augment the JSX namespace to include Three.js elements used by @react-three/fiber
-// This handles cases where automatic type inference from R3F fails or is missing.
-// We extend both global JSX and React.JSX to cover different project configurations.
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      group: any;
-      mesh: any;
-      octahedronGeometry: any;
-      meshStandardMaterial: any;
-      ambientLight: any;
-      hemisphereLight: any;
-      directionalLight: any;
-      pointLight: any;
-      fog: any;
-    }
-  }
-}
-
-declare module 'react' {
-  namespace JSX {
-    interface IntrinsicElements {
-      group: any;
-      mesh: any;
-      octahedronGeometry: any;
-      meshStandardMaterial: any;
-      ambientLight: any;
-      hemisphereLight: any;
-      directionalLight: any;
-      pointLight: any;
-      fog: any;
-    }
-  }
-}
-
 // --- Types ---
 interface NodeProps {
   position: THREE.Vector3;
@@ -231,8 +196,8 @@ const SkillDNAVisualizer: React.FC = () => {
       <Canvas camera={{ position: [0, 0, 12], fov: 40 }} gl={{ alpha: true, antialias: true }}>
         <AnimatedLighting />
         
-        {/* Floating Particle Dust */}
-        <Stars radius={50} depth={50} count={2000} factor={4} saturation={0} fade speed={0.5} />
+        {/* Floating Particle Dust - Reduced count for performance */}
+        <Stars radius={50} depth={50} count={800} factor={4} saturation={0} fade speed={0.5} />
         
         <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.2}>
             <DoubleHelix />

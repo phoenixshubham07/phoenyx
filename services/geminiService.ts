@@ -1,10 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 import { SYSTEM_PROMPT } from '../constants';
 
-const apiKey = process.env.API_KEY || '';
-// Initialize globally to avoid re-creation, though in a real app might be inside a hook
-// We strictly follow the rule: apiKey must be from process.env.API_KEY
-const ai = new GoogleGenAI({ apiKey });
+// Initialize the client using process.env.API_KEY directly as per guidelines.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const sendMessageToNexus = async (
   userMessage: string, 

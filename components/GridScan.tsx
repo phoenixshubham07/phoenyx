@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, memo } from 'react';
 import { EffectComposer, RenderPass, EffectPass, BloomEffect, ChromaticAberrationEffect } from 'postprocessing';
 import * as THREE from 'three';
 import * as faceapi from 'face-api.js';
@@ -303,7 +303,7 @@ void main(){
 }
 `;
 
-export const GridScan: React.FC<GridScanProps> = ({
+const GridScanComponent: React.FC<GridScanProps> = ({
   enableWebcam = false,
   showPreview = false,
   modelsPath = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights',
@@ -681,6 +681,8 @@ export const GridScan: React.FC<GridScanProps> = ({
   }, [enableGyro, uiFaceActive]);
 
   useEffect(() => {
+    if (!enableWebcam) return;
+
     let canceled = false;
     const load = async () => {
       try {
@@ -697,14 +699,16 @@ export const GridScan: React.FC<GridScanProps> = ({
     return () => {
       canceled = true;
     };
-  }, [modelsPath]);
+  }, [modelsPath, enableWebcam]);
 
   useEffect(() => {
+    if (!enableWebcam) return;
+    
     let stop = false;
     let lastDetect = 0;
 
     const start = async () => {
-      if (!enableWebcam || !modelsReady) return;
+      if (!modelsReady) return;
       const video = videoRef.current;
       if (!video) return;
 
@@ -823,6 +827,7 @@ export const GridScan: React.FC<GridScanProps> = ({
   );
 };
 
+// ... utility functions ...
 function srgbColor(hex: string) {
   const c = new THREE.Color(hex);
   return c.convertSRGBToLinear();
@@ -925,4 +930,6 @@ function dist2(a: { x: number; y: number }, b: { x: number; y: number }) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
+// Memoize to prevent re-renders when parent re-renders if props are the same
+export const GridScan = memo(GridScanComponent);
 export default GridScan;

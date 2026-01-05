@@ -16,7 +16,8 @@
     "@react-three/fiber": "8.15.16",
     "@react-three/drei": "9.99.0",
     "postprocessing": "6.36.0",
-    "face-api.js": "0.22.2"
+    "face-api.js": "0.22.2",
+    "@react-three/postprocessing": "^3.0.4"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
